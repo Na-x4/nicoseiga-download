@@ -9,8 +9,7 @@
 // @downloadURL https://github.com/taba256/nicoseiga-download/raw/master/nicoseiga-download.user.js
 // @match       *://seiga.nicovideo.jp/watch/mg*
 // @grant       unsafeWindow
-// @grant       GM_registerMenuCommand
-// @grant       GM_xmlhttpRequest
+// @grant       GM.xmlHttpRequest
 // @connect     drm.nicoseiga.jp
 // @connect     lohas.nicoseiga.jp
 // @connect     seiga.nicovideo.jp
@@ -111,10 +110,12 @@
 			const dir = zip.folder(episode_title);
 			const args = unsafeWindow.args;
 			const di=new DownloadInfomation(episode_title);
+      
+      const pages = Array.from(args.pages);
 
-			await Promise.all(args.pages.map(page=>new Promise((resolve,reject)=>{
+			await Promise.all(pages.map(page=>new Promise((resolve,reject)=>{
 				const dl=di.addDownload((new URL(page.url)).pathname.replace(/.*\//,""),reject);
-				GM_xmlhttpRequest({method:"GET",url:page.url,responseType:"arraybuffer",onload:xhr=>{
+				GM.xmlHttpRequest({method:"GET",url:page.url,responseType:"arraybuffer",onload:xhr=>{
 					const url=new URL(xhr.finalUrl);
 					let data=new Uint8Array(xhr.response);
 					if(url.hostname==="drm.nicoseiga.jp" || url.hostname==="nicoseiga.cdn.nimg.jp" || url.hostname==="manga-drm.nicoseiga.jp"){
@@ -145,5 +146,4 @@
 	downloadButton.textContent = "ダウンロード";
 	downloadButton.addEventListener("click",download);
 	title_element.appendChild(downloadButton);
-	GM_registerMenuCommand("ニコニコ静画ダウンロード",download);
 })();
